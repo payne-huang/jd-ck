@@ -7,6 +7,7 @@ import com.ck.jd.control.vo.CkVO;
 import com.ck.jd.control.vo.ResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -77,11 +78,13 @@ public class IndexServiceImpl implements IndexService {
             String ck = ptKey + ";" + ptPin + ";";
             param.put("name", "JD_COOKIE");
             param.put("value", ck);
-            param.put("remarks", ckVO.getRemarks());
+            if (!StringUtils.isEmpty(ckDTO.getComment())) {
+                param.put("remarks", ckDTO.getComment());
+            }
             if (ckVO != null) {
                 param.put("_id", ckVO.get_id());
-                if (!StringUtils.isEmpty(ckDTO.getComment())) {
-                    param.put("remarks", ckDTO.getComment());
+                if (StringUtils.isEmpty(param.get("remarks"))){
+                    param.put("remarks", ckVO.getRemarks());
                 }
                 Request.Put(clientHost + url)
                         .addHeader("Authorization", "Bearer " + getToken())
@@ -92,9 +95,13 @@ public class IndexServiceImpl implements IndexService {
                         .addHeader("Authorization", "Bearer " + getToken())
                         .bodyString(JSON.toJSONString(ids), ContentType.APPLICATION_JSON).execute().returnContent().toString();
             } else {
-                Request.Post(clientHost + url)
+                List<Map<String, String>> list = new ArrayList<>();
+                list.add(param);
+                Response response = Request.Post(clientHost + url)
                         .addHeader("Authorization", "Bearer " + getToken())
-                        .bodyString(JSON.toJSONString(param), ContentType.APPLICATION_JSON).execute().returnContent().toString();
+                        .bodyString(JSON.toJSONString(list), ContentType.APPLICATION_JSON).execute();
+                String s = response.returnContent().toString();
+
             }
         }
     }

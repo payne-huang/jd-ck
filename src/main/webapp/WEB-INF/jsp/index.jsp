@@ -121,7 +121,7 @@
                 } else {
                     swal({
                         title: "提示！",
-                        text: "更新失败!",
+                        text: "更新失败!，请联系管理员！",
                         type: "error"
                     });
                 }

@@ -31,7 +31,11 @@ public class IndexController extends BaseController {
     @PostMapping("/ck/put")
     @ResponseBody
     public Response ckPut(@RequestBody CkDTO ckDTO) throws IOException {
-        indexService.ckPut(ckDTO);
+        try {
+            indexService.ckPut(ckDTO);
+        } catch (Exception e){
+            return error();
+        }
         return success();
     }
 
