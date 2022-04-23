@@ -63,11 +63,12 @@ public class IndexServiceImpl implements IndexService {
         String ptKey = null;
         String ptPin = null;
         for (String kv : kvs) {
-            if (kv.startsWith("pt_key=")) {
-                ptKey = kv;
+            String value = kv.trim();
+            if (value.startsWith("pt_key=")) {
+                ptKey = value;
             }
-            if (kv.trim().startsWith("pt_pin=")) {
-                ptPin = kv;
+            if (value.startsWith("pt_pin=")) {
+                ptPin = value;
             }
         }
         if (ptKey != null && ptPin != null) {
@@ -75,7 +76,7 @@ public class IndexServiceImpl implements IndexService {
             CkVO ckVO = getCkByPin(ptPin, ckVOS);
             String url = "/envs";
             Map<String, String> param = new HashMap<>();
-            String ck = ptKey + ";" + ptPin + ";";
+            String ck = ptKey + "; " + ptPin + ";";
             param.put("name", "JD_COOKIE");
             param.put("value", ck);
             if (!StringUtils.isEmpty(ckDTO.getComment())) {
@@ -97,11 +98,9 @@ public class IndexServiceImpl implements IndexService {
             } else {
                 List<Map<String, String>> list = new ArrayList<>();
                 list.add(param);
-                Response response = Request.Post(clientHost + url)
+                Request.Post(clientHost + url)
                         .addHeader("Authorization", "Bearer " + getToken())
-                        .bodyString(JSON.toJSONString(list), ContentType.APPLICATION_JSON).execute();
-                String s = response.returnContent().toString();
-
+                        .bodyString(JSON.toJSONString(list), ContentType.APPLICATION_JSON).execute().returnContent().toString();
             }
         }
     }
