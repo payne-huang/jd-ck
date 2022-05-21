@@ -126,6 +126,9 @@ public class IndexServiceImpl implements IndexService {
 
     @Scheduled(cron = "*/5  * * * *")
     private void subscribe() {
+        if (monitors.size() == 0){
+            initSubscribes();
+        }
         try {
             for (Monitor monitor : monitors) {
                 String newSha1 = monitor.getGhBranch().getSHA1();
