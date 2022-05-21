@@ -10,6 +10,6 @@ public class JdApplication {
     public static void main(String[] args) {
         SpringApplication.run(JdApplication.class, args);
         ScribeThread scribeThread = new ScribeThread();
-        scribeThread.run();
+        scribeThread.start();
     }
 }
