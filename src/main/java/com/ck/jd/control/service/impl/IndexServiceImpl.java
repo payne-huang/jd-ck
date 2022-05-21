@@ -133,6 +133,7 @@ public class IndexServiceImpl implements IndexService {
             for (Monitor monitor : monitors) {
                 String newSha1 = monitor.getGhBranch().getSHA1();
                 if (StringUtils.isNotBlank(newSha1) && StringUtils.equalsIgnoreCase(newSha1, monitor.getCommitId())) {
+                    log.info("触发同步操作---");
                     monitor.setCommitId(newSha1);
                     callTaskRun(monitor.getId());
                     GHCommit ghCommit = monitor.getGhRepository().getCommit(newSha1);
