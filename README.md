@@ -8,6 +8,11 @@ CK更新工具
   client.host=http://192.168.1.99:5700/open    //青龙地址
   client.id=                                   //青龙应用ID
   client.secret=                               //青龙应用key
+
+  github.token=             //私有gitToken
+  github.subscribes=smiek2121/scripts@master@青龙任务ID;smiek2121/scripts@master@青龙任务ID
+
+  push.plus.token=推送ID，默认1对1   //不填写不推送
   
 1. 本地安装 JAVA环境和MAVEN环境，安装教程请百度
 2. 进入项目根目录，执行命令  mvn clean package  打包，

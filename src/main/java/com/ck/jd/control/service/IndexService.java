@@ -10,4 +10,6 @@ public interface IndexService {
     List<CkVO> getCk() throws IOException;
 
     void ckPut(CkDTO ckDTO) throws IOException;
+
+    void initSubscribes();
 }
