@@ -70,6 +70,13 @@
         toolbar: '#toolbar',//指定工作栏
         columns: [
             {
+                title:'序号',
+                align: "center",
+                width: 40,
+                field:'index'
+            }
+            ,
+            {
                 title: 'PIN',
                 field: 'value'
             },

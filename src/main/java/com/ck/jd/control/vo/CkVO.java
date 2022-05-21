@@ -9,4 +9,5 @@ public class CkVO {
     String remarks;
     String _id;
     String name;
+    Integer index;
 }

@@ -8,18 +8,16 @@ import com.ck.jd.control.vo.Monitor;
 import com.ck.jd.control.vo.ResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
 import org.kohsuke.github.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service(value = "indexService")
 @Slf4j
@@ -53,9 +51,12 @@ public class IndexServiceImpl implements IndexService {
         String body = Request.Get(clientHost + "/envs")
                 .addHeader("Authorization", "Bearer " + getToken()).execute().returnContent().toString();
         List<CkVO> ckVOS = JSON.parseArray(JSON.parseObject(body, ResultVO.class).getData(), CkVO.class);
+        AtomicInteger index = new AtomicInteger(1);
         ckVOS.forEach(ckVO -> {
             String ptPin = ckVO.getValue().split("pt_pin")[1];
             ckVO.setValue("pt_pin" + ptPin);
+            ckVO.setIndex(index.get());
+            index.getAndIncrement();
         });
         return ckVOS;
     }
