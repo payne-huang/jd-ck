@@ -16,13 +16,6 @@ public class ScribeThread extends Thread {
     @Override
     public void run() {
         indexService.initSubscribes();
-        while (true) {
-            indexService.subscribe();
-            try {
-                Thread.sleep(1000 * 60 * 5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        indexService.subscribe();
     }
 }

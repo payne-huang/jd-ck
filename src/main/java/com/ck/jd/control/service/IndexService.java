@@ -14,6 +14,4 @@ public interface IndexService {
     void initSubscribes();
 
     void subscribe();
-
-
 }

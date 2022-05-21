@@ -43,6 +43,9 @@ public class IndexServiceImpl implements IndexService {
     @Value("${push.plus.token}")
     String pushPlusToken;
 
+    @Value("${scribe.inter}")
+    Integer inter;
+
     Set<Monitor> monitors = new HashSet<>();
 
     @Override
@@ -129,28 +132,38 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void subscribe() {
-        log.info("轮询开始····");
-        try {
-            for (Monitor monitor : monitors) {
-                String newSha1 = monitor.getGhBranch().getSHA1();
-                if (StringUtils.isNotBlank(newSha1) && !StringUtils.equalsIgnoreCase(newSha1, monitor.getCommitId())) {
-                    monitor.setCommitId(newSha1);
-                    callTaskRun(monitor.getId());
-                    GHCommit ghCommit = monitor.getGhRepository().getCommit(newSha1);
-                    String message = ghCommit.getCommitShortInfo().getMessage();
-                    if (StringUtils.isNotBlank(pushPlusToken)) {
-                        callPushWx(monitor.getGhRepository().getFullName(), message);
+        while (true) {
+            log.info("轮询迭代····");
+            try {
+                for (Monitor monitor : monitors) {
+                    String newSha1 = monitor.getGhBranch().getSHA1();
+                    if (StringUtils.isNotBlank(newSha1) && !StringUtils.equalsIgnoreCase(newSha1, monitor.getCommitId())) {
+                        log.info(monitor.getGhRepository().getFullName() + " = 更新开始");
+                        monitor.setCommitId(newSha1);
+                        callTaskRun(monitor.getId());
+                        GHCommit ghCommit = monitor.getGhRepository().getCommit(newSha1);
+                        String message = ghCommit.getCommitShortInfo().getMessage();
+                        if (StringUtils.isNotBlank(pushPlusToken)) {
+                            callPushWx(monitor.getGhRepository().getFullName(), message);
+                        }
+                        log.info(monitor.getGhRepository().getFullName() + " = 更新完成");
                     }
                 }
+            } catch (Exception e) {
+                log.error("订阅轮询失败");
             }
-        } catch (Exception e) {
-            log.error("订阅轮询失败");
+            try {
+                Thread.sleep(1000 * 60 * inter);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     private void callPushWx(String name, String message) {
         try {
-            String title = URLEncoder.encode(name+" 更新");
+            String title = URLEncoder.encode(name + " 更新");
             String content = URLEncoder.encode(message);
             String url = String.format("http://www.pushplus.plus/send?token=%s&title=%s&content=%s&template=json", pushPlusToken, title, content);
             Request.Get(url).execute().returnContent().toString();
@@ -166,7 +179,7 @@ public class IndexServiceImpl implements IndexService {
             Request.Put(clientHost + "/crons/run")
                     .addHeader("Authorization", "Bearer " + getToken())
                     .bodyString(JSON.toJSONString(list), ContentType.APPLICATION_JSON).execute().returnContent().toString();
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("触发任务失败", e);
         }
     }
