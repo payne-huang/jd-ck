@@ -9,10 +9,13 @@ CK更新工具
 修改配置：
   修改application.proeraties
   client.host=http://192.168.1.99:5700/open    //青龙地址
+  
   client.id=                                   //青龙应用ID
+  
   client.secret=                               //青龙应用key
 
   github.token=             //私有gitToken
+  
   github.subscribes=smiek2121/scripts@master@青龙任务ID;smiek2121/scripts@master@青龙任务ID
 
   push.plus.token=推送ID，默认1对1   //不填写不推送
