@@ -86,6 +86,7 @@
             },
             {
                 title: '状态',
+                align: "center",
                 field: 'status',
                 formatter: statusFormatter
             }
