@@ -129,6 +129,7 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void subscribe() {
+        log.info("轮询开始····");
         try {
             for (Monitor monitor : monitors) {
                 String newSha1 = monitor.getGhBranch().getSHA1();
