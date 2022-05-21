@@ -12,4 +12,8 @@ public interface IndexService {
     void ckPut(CkDTO ckDTO) throws IOException;
 
     void initSubscribes();
+
+    void subscribe();
+
+
 }

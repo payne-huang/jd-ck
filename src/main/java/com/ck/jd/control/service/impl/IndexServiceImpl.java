@@ -8,7 +8,9 @@ import com.ck.jd.control.vo.Monitor;
 import com.ck.jd.control.vo.ResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
 import org.kohsuke.github.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,9 +18,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.*;
 
-@Service
+@Service(value = "indexService")
 @Slf4j
 public class IndexServiceImpl implements IndexService {
 
@@ -124,16 +127,12 @@ public class IndexServiceImpl implements IndexService {
         return null;
     }
 
-    @Scheduled(cron = "*/5  * * * *")
-    private void subscribe() {
-        if (monitors.size() == 0){
-            initSubscribes();
-        }
+
+    public void subscribe() {
         try {
             for (Monitor monitor : monitors) {
                 String newSha1 = monitor.getGhBranch().getSHA1();
                 if (StringUtils.isNotBlank(newSha1) && StringUtils.equalsIgnoreCase(newSha1, monitor.getCommitId())) {
-                    log.info("触发同步操作---");
                     monitor.setCommitId(newSha1);
                     callTaskRun(monitor.getId());
                     GHCommit ghCommit = monitor.getGhRepository().getCommit(newSha1);
@@ -150,8 +149,11 @@ public class IndexServiceImpl implements IndexService {
 
     private void callPushWx(String name, String message) {
         try {
-            Request.Get(String.format("http://www.pushplus.plus/send?token=%s&title=%s&content=%s&template=json", pushPlusToken, name + " 更新", message)).execute().returnContent().toString();
-        } catch (IOException e) {
+            String title = URLEncoder.encode(name+" 更新");
+            String content = URLEncoder.encode(message);
+            String url = String.format("http://www.pushplus.plus/send?token=%s&title=%s&content=%s&template=json", pushPlusToken, title, content);
+            Request.Get(url).execute().returnContent().toString();
+        } catch (Exception e) {
             log.error("请求推送失败！", e);
         }
     }
@@ -182,6 +184,7 @@ public class IndexServiceImpl implements IndexService {
                     String sha1 = ghBranch.getSHA1();
                     monitor.setCommitId(sha1);
                     monitor.setGhBranch(ghBranch);
+                    monitor.setGhRepository(repository);
                     monitor.setId(data[2]);
                     monitors.add(monitor);
                 }
