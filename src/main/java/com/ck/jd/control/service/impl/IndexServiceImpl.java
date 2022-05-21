@@ -124,7 +124,7 @@ public class IndexServiceImpl implements IndexService {
         return null;
     }
 
-    @Scheduled(cron = "")
+    @Scheduled(cron = "*/5  * * * *")
     private void subscribe() {
         try {
             for (Monitor monitor : monitors) {
