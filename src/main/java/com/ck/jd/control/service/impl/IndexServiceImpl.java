@@ -166,6 +166,7 @@ public class IndexServiceImpl implements IndexService {
                         String message = ghRepository.getCommit(newSha1).getCommitShortInfo().getMessage();
                         messageVO.setFullName(fullName);
                         messageVO.setMessage(message);
+                        messageVOS.add(messageVO);
                     }
                 }
             }
