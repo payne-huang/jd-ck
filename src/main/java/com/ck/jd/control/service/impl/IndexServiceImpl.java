@@ -44,7 +44,8 @@ public class IndexServiceImpl implements IndexService {
     @Value("${scribe.inter}")
     Integer inter;
 
-    Set<Monitor> monitors = new HashSet<>();
+    volatile Map<String, String> cache = new HashMap<>();
+
 
     @Override
     public List<CkVO> getCk() throws IOException {
@@ -133,33 +134,42 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void subscribe() {
-        while (true) {
-            log.info("轮询迭代····");
-            try {
-                for (Monitor monitor : monitors) {
-                    String newSha1 = monitor.getGhBranch().getSHA1();
-                    if (StringUtils.isNotBlank(newSha1) && !StringUtils.equalsIgnoreCase(newSha1, monitor.getCommitId())) {
-                        log.info(monitor.getGhRepository().getFullName() + " = 更新开始");
-                        monitor.setCommitId(newSha1);
-                        callTaskRun(monitor.getId());
-                        GHCommit ghCommit = monitor.getGhRepository().getCommit(newSha1);
-                        String message = ghCommit.getCommitShortInfo().getMessage();
-                        if (StringUtils.isNotBlank(pushPlusToken)) {
-                            callPushWx(monitor.getGhRepository().getFullName(), message);
-                        }
-                        log.info(monitor.getGhRepository().getFullName() + " = 更新完成");
-                    }
-                }
-            } catch (Exception e) {
-                log.error("订阅轮询失败");
-            }
+        log.info("订阅启动成功");
+        while (true){
+            exec();
+
             try {
                 Thread.sleep(1000 * 60 * inter);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
 
+    private void exec() {
+        log.info("轮询刷新...");
+        try {
+            GitHub gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
+            String[] subscribes = gitSubscribes.trim().split(";");
+            for (String subscribe : subscribes) {
+                String[] data = subscribe.split("@");
+                GHRepository ghRepository = gitHub.getRepository(data[0]);
+                String fullName = ghRepository.getFullName();
+                GHBranch ghBranch = ghRepository.getBranch(data[1]);
+                String newSha1 = ghBranch.getSHA1();
+                if (StringUtils.isNotBlank(newSha1) && !StringUtils.equalsIgnoreCase(newSha1, cache.get(fullName))) {
+                    cache.put(fullName, newSha1);
+                    callTaskRun(data[2]);
+                    GHCommit ghCommit = ghRepository.getCommit(newSha1);
+                    String message = ghCommit.getCommitShortInfo().getMessage();
+                    if (StringUtils.isNotBlank(pushPlusToken)) {
+                        callPushWx(fullName, message);
+                    }
+                }
+            }
+        } catch (Exception e){
+            log.error("订阅失败",  e);
+        }
     }
 
     private void callPushWx(String name, String message) {
@@ -182,31 +192,6 @@ public class IndexServiceImpl implements IndexService {
                     .bodyString(JSON.toJSONString(list), ContentType.APPLICATION_JSON).execute().returnContent().toString();
         } catch (Exception e) {
             log.error("触发任务失败", e);
-        }
-    }
-
-    @Override
-    public void initSubscribes() {
-        try {
-            GitHub gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
-            String[] subscribes = gitSubscribes.trim().split(";");
-            for (String subscribe : subscribes) {
-                String[] data = subscribe.split("@");
-                if (data.length == 3) {
-                    Monitor monitor = new Monitor();
-                    GHRepository repository = gitHub.getRepository(data[0]);
-                    GHBranch ghBranch = repository.getBranch(data[1]);
-                    String sha1 = ghBranch.getSHA1();
-                    monitor.setCommitId(sha1);
-                    monitor.setGhBranch(ghBranch);
-                    monitor.setGhRepository(repository);
-                    monitor.setId(data[2]);
-                    monitors.add(monitor);
-                }
-            }
-            log.info("订阅器初始化成功！");
-        } catch (Exception e) {
-            log.error("初始化订阅器失败，请重启服务！", e);
         }
     }
 }

@@ -15,7 +15,6 @@ public class ScribeThread extends Thread {
 
     @Override
     public void run() {
-        indexService.initSubscribes();
         indexService.subscribe();
     }
 }
