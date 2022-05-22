@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.ck.jd.control.service.IndexService;
 import com.ck.jd.control.vo.CkDTO;
 import com.ck.jd.control.vo.CkVO;
-import com.ck.jd.control.vo.Monitor;
+import com.ck.jd.control.vo.MessageVO;
 import com.ck.jd.control.vo.ResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -135,7 +135,7 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public void subscribe() {
         log.info("订阅启动成功");
-        while (true){
+        while (true) {
             exec();
 
             try {
@@ -148,6 +148,7 @@ public class IndexServiceImpl implements IndexService {
 
     private void exec() {
         log.info("轮询刷新...");
+        List<MessageVO> messageVOS = new ArrayList<>();
         try {
             GitHub gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
             String[] subscribes = gitSubscribes.trim().split(";");
@@ -160,22 +161,26 @@ public class IndexServiceImpl implements IndexService {
                 if (StringUtils.isNotBlank(newSha1) && !StringUtils.equalsIgnoreCase(newSha1, cache.get(fullName))) {
                     cache.put(fullName, newSha1);
                     callTaskRun(data[2]);
-                    GHCommit ghCommit = ghRepository.getCommit(newSha1);
-                    String message = ghCommit.getCommitShortInfo().getMessage();
                     if (StringUtils.isNotBlank(pushPlusToken)) {
-                        callPushWx(fullName, message);
+                        MessageVO messageVO = new MessageVO();
+                        String message = ghRepository.getCommit(newSha1).getCommitShortInfo().getMessage();
+                        messageVO.setFullName(fullName);
+                        messageVO.setMessage(message);
                     }
                 }
             }
-        } catch (Exception e){
-            log.error("订阅失败",  e);
+        } catch (Exception e) {
+            log.error("订阅失败", e);
+        } finally {
+            if (messageVOS.size() > 0) {
+                callPushWx("仓库更新", messageVOS);
+            }
         }
     }
 
-    private void callPushWx(String name, String message) {
+    private void callPushWx(String title, List<MessageVO> messageVOS) {
         try {
-            String title = URLEncoder.encode(name + " 更新");
-            String content = URLEncoder.encode(message);
+            String content = URLEncoder.encode(JSON.toJSONString(messageVOS));
             String url = String.format("http://www.pushplus.plus/send?token=%s&title=%s&content=%s&template=json", pushPlusToken, title, content);
             Request.Get(url).execute().returnContent().toString();
         } catch (Exception e) {
