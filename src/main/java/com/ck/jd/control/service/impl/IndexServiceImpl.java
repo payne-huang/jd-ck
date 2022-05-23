@@ -134,7 +134,6 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void subscribe() {
-        log.info("订阅启动成功");
         while (true) {
             exec();
 
@@ -147,7 +146,6 @@ public class IndexServiceImpl implements IndexService {
     }
 
     private void exec() {
-        log.info("轮询刷新...");
         List<MessageVO> messageVOS = new ArrayList<>();
         try {
             GitHub gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
