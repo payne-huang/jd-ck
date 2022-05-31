@@ -174,7 +174,7 @@ public class IndexServiceImpl implements IndexService {
                     }
                 }
             } catch (Exception e) {
-                log.error("仓库订阅失败！={}", e.getMessage());
+                log.error("仓库【{}】订阅失败！={}", subscribe, e.getMessage());
             }
         }
 
