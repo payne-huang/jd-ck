@@ -147,10 +147,16 @@ public class IndexServiceImpl implements IndexService {
 
     private void exec() {
         List<MessageVO> messageVOS = new ArrayList<>();
+
+        GitHub gitHub = null;
         try {
-            GitHub gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
-            String[] subscribes = gitSubscribes.trim().split(";");
-            for (String subscribe : subscribes) {
+            gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
+        } catch (IOException e) {
+            log.error("初始化账号失败！={}", e.getMessage());
+        }
+        String[] subscribes = gitSubscribes.trim().split(";");
+        for (String subscribe : subscribes) {
+            try {
                 String[] data = subscribe.split("@");
                 GHRepository ghRepository = gitHub.getRepository(data[0]);
                 String fullName = ghRepository.getFullName();
@@ -167,13 +173,13 @@ public class IndexServiceImpl implements IndexService {
                         messageVOS.add(messageVO);
                     }
                 }
+            } catch (Exception e) {
+                log.error("仓库订阅失败！={}", e.getMessage());
             }
-        } catch (Exception e) {
-            log.error("订阅失败", e);
-        } finally {
-            if (messageVOS.size() > 0) {
-                callPushWx("仓库更新", messageVOS);
-            }
+        }
+
+        if (messageVOS.size() > 0) {
+            callPushWx("仓库更新", messageVOS);
         }
     }
 
