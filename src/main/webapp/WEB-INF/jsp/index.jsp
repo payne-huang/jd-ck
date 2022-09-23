@@ -81,6 +81,10 @@
                 field: 'value'
             },
             {
+                title: '更新时间',
+                field: 'timestamp'
+            },
+            {
                 title: '备注',
                 field: 'remarks',
             },

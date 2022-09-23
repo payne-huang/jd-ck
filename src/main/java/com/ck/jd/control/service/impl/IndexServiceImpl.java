@@ -16,8 +16,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,9 +70,12 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public List<CkVO> getCkNoToken() throws IOException {
         List<CkVO> ckVOS = getCk();
-        for (CkVO ckVO: ckVOS) {
+        for (CkVO ckVO : ckVOS) {
             String noTokenRemark = ckVO.getRemarks().replaceAll(":\\$.*", "");
             ckVO.setRemarks(noTokenRemark);
+            SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            String format = df.format(new Date(ckVO.getTimestamp()));
+            ckVO.setTimestamp(format);
         }
         return ckVOS;
     }
@@ -176,9 +182,10 @@ public class IndexServiceImpl implements IndexService {
             List<CkVO> ckVOS = getCk();
             for (CkVO ckVO : ckVOS) {
                 String remarks = ckVO.getRemarks();
-                long useTime = System.currentTimeMillis() - ckVO.getTimestamp().getTime();
+                long useTime = System.currentTimeMillis() - new Date(ckVO.getTimestamp()).getTime();
                 long expire = 30 - useTime / (1000 * 60 * 60 * 24);
                 if (expire <= 3 && StringUtils.isNotBlank(remarks) && StringUtils.isNotBlank(getMatchToken(remarks))) {
+                    log.info("通知用户={}", remarks);
                     String token = getMatchToken(remarks);
                     push(token, expire);
                 }

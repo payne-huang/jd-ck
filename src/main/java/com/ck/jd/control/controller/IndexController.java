@@ -42,7 +42,7 @@ public class IndexController extends BaseController {
     @GetMapping("/ck/list")
     @ResponseBody
     public Response getCk() throws IOException {
-        List<CkVO> ckVOList = indexService.getCk();
+        List<CkVO> ckVOList = indexService.getCkNoToken();
         return success(ckVOList);
     }
 }
