@@ -26,3 +26,6 @@ CK更新工具
 4. 服务器安装java运行环境
 5. 切换到adversereactions.jar 所在目录，执行命令  nohup java -jar adversereactions.jar 2>&1 & 
 6. 访问http://服务器ip:80/index  既可 (80端口自行修改application.proeraties)
+
+
+CK失效预通知：车头自行设置CK备注xxx:$pushplusToken ，不配置不通知
