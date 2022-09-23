@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service(value = "indexService")
 @Slf4j
@@ -62,6 +64,15 @@ public class IndexServiceImpl implements IndexService {
         return ckVOS;
     }
 
+    @Override
+    public List<CkVO> getCkNoToken() throws IOException {
+        List<CkVO> ckVOS = getCk();
+        for (CkVO ckVO: ckVOS) {
+            String noTokenRemark = ckVO.getRemarks().replaceAll(":\\$.*", "");
+            ckVO.setRemarks(noTokenRemark);
+        }
+        return ckVOS;
+    }
 
     public String getToken() {
         try {
@@ -104,6 +115,10 @@ public class IndexServiceImpl implements IndexService {
                 param.put("_id", ckVO.get_id());
                 if (StringUtils.isEmpty(param.get("remarks"))) {
                     param.put("remarks", ckVO.getRemarks());
+                } else {
+                    if (StringUtils.isNotBlank(ckVO.getRemarks()) && StringUtils.isNotBlank(getMatchToken(ckVO.getRemarks()))) {
+                        param.put("remarks", ckDTO.getComment() + ":$" + getMatchToken(ckVO.getRemarks()));
+                    }
                 }
                 Request.Put(clientHost + url)
                         .addHeader("Authorization", "Bearer " + getToken())
@@ -136,13 +151,60 @@ public class IndexServiceImpl implements IndexService {
     public void subscribe() {
         while (true) {
             exec();
-
             try {
                 Thread.sleep(1000 * 60 * inter);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void pushWx() {
+        while (true) {
+            execPush();
+            try {
+                Thread.sleep(1000 * 60 * 60 * 2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void execPush() {
+        try {
+            List<CkVO> ckVOS = getCk();
+            for (CkVO ckVO : ckVOS) {
+                String remarks = ckVO.getRemarks();
+                long useTime = System.currentTimeMillis() - ckVO.getTimestamp().getTime();
+                long expire = 30 - useTime / (1000 * 60 * 60 * 24);
+                if (expire <= 3 && StringUtils.isNotBlank(remarks) && StringUtils.isNotBlank(getMatchToken(remarks))) {
+                    String token = getMatchToken(remarks);
+                    push(token, expire);
+                }
+            }
+        } catch (Exception e) {
+            log.error("推送失败", e);
+        }
+    }
+
+    private void push(String token, long time) {
+        try {
+            String content = URLEncoder.encode("CK还剩下" + time + "天，速更新！");
+            String url = String.format("http://www.pushplus.plus/send?token=%s&title=%s&content=%s&template=json", token, "CK更新通知", content);
+            Request.Get(url).execute().returnContent().toString();
+        } catch (Exception e) {
+            log.error("请求推送失败！", e);
+        }
+    }
+
+    private String getMatchToken(String s) {
+        Pattern pattern = Pattern.compile(":\\$(.*)");
+        Matcher matcher = pattern.matcher(s);
+        while (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
     private void exec() {
