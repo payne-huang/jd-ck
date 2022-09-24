@@ -113,7 +113,7 @@
     function updateCK() {
         var data = "{";
         data = data + "\"pin\":\"" + $("#pin").val() + "\",";
-        data = data + "\"comment\":\"" + $("#comment").val() + "\"";
+        data = data + "\"comment\":\"" + $("#comment").val() + "\",";
         data = data + "\"token\":\"" + $("#token").val() + "\"";
         data = data + "}";
         $.ajax({

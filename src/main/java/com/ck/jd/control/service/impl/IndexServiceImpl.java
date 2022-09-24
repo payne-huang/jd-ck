@@ -103,18 +103,9 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public void ckPut(CkDTO ckDTO) throws IOException {
 
-        String[] kvs = ckDTO.getPin().split(";");
-        String ptKey = null;
-        String ptPin = null;
-        for (String kv : kvs) {
-            String value = kv.trim();
-            if (value.startsWith("pt_key=")) {
-                ptKey = value;
-            }
-            if (value.startsWith("pt_pin=")) {
-                ptPin = value;
-            }
-        }
+        String ptKey = getByReg(ckDTO.getPin(), "(pt_key=[A-Za-z0-9_-]+;)");
+        String ptPin = getByReg(ckDTO.getPin(), "(pt_pin=[%A-Za-z0-9_-]+;)");;
+
         if (ptKey != null && ptPin != null) {
             List<CkVO> ckVOS = getCk();
             CkVO ckVO = getCkByPin(ptPin, ckVOS);
@@ -237,6 +228,15 @@ public class IndexServiceImpl implements IndexService {
 
     private String getMatchToken(String s) {
         Pattern pattern = Pattern.compile(":\\$(.*)");
+        Matcher matcher = pattern.matcher(s);
+        while (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    private String getByReg(String s, String reg) {
+        Pattern pattern = Pattern.compile(reg);
         Matcher matcher = pattern.matcher(s);
         while (matcher.find()) {
             return matcher.group(1);
