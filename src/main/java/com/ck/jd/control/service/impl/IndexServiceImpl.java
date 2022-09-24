@@ -103,8 +103,8 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public void ckPut(CkDTO ckDTO) throws IOException {
 
-        String ptKey = getByReg(ckDTO.getPin(), "(pt_key=[A-Za-z0-9_-]+;)");
-        String ptPin = getByReg(ckDTO.getPin(), "(pt_pin=[%A-Za-z0-9_-]+;)");;
+        String ptKey = getByReg(ckDTO.getPin(), "(pt_key=[A-Za-z0-9_-]+);");
+        String ptPin = getByReg(ckDTO.getPin(), "(pt_pin=[%A-Za-z0-9_-]+);");
 
         if (ptKey != null && ptPin != null) {
             List<CkVO> ckVOS = getCk();
