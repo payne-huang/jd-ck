@@ -74,11 +74,6 @@
                 align: "center",
                 width: 40,
                 field:'index'
-            }
-            ,
-            {
-                title: 'PIN',
-                field: 'value'
             },
             {
                 title: '更新时间',

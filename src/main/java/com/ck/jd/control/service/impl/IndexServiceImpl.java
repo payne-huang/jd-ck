@@ -76,6 +76,7 @@ public class IndexServiceImpl implements IndexService {
             SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             String format = df.format(new Date(ckVO.getTimestamp()));
             ckVO.setTimestamp(format);
+            ckVO.setValue(null);
         }
         return ckVOS;
     }
