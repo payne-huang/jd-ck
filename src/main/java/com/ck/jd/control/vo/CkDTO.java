@@ -6,4 +6,5 @@ import lombok.Data;
 public class CkDTO {
     String pin;
     String comment;
+    String token;
 }

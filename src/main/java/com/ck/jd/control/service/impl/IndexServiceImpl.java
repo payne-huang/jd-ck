@@ -71,8 +71,16 @@ public class IndexServiceImpl implements IndexService {
     public List<CkVO> getCkNoToken() throws IOException {
         List<CkVO> ckVOS = getCk();
         for (CkVO ckVO : ckVOS) {
+            boolean b = false;
+            if (ckVO.getRemarks().contains(":$")){
+                b = true;
+            }
             String noTokenRemark = ckVO.getRemarks().replaceAll(":\\$.*", "");
-            ckVO.setRemarks(noTokenRemark);
+            if (b){
+                ckVO.setRemarks(noTokenRemark + "-通知");
+            } else {
+                ckVO.setRemarks(noTokenRemark);
+            }
             SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             String format = df.format(new Date(ckVO.getTimestamp()));
             ckVO.setTimestamp(format);
@@ -115,11 +123,32 @@ public class IndexServiceImpl implements IndexService {
             String ck = ptKey + "; " + ptPin + ";";
             param.put("name", "JD_COOKIE");
             param.put("value", ck);
-            if (!StringUtils.isEmpty(ckDTO.getComment())) {
-                param.put("remarks", ckDTO.getComment());
-            }
             if (ckVO != null) {
                 param.put("_id", ckVO.get_id());
+                if (StringUtils.isNotBlank(ckDTO.getComment())){
+                    if (StringUtils.isNotBlank(ckDTO.getToken())){
+                        param.put("remarks", ckDTO.getComment() + ":$" + ckDTO.getToken());
+                    } else {
+                        if (StringUtils.isNotBlank(getMatchToken(ckVO.getRemarks()))){
+                            param.put("remarks", ckDTO.getComment() + ":$" + getMatchToken(ckVO.getRemarks()));
+                        } else {
+                            param.put("remarks", ckDTO.getComment());
+                        }
+                    }
+                } else {
+                    String remarks = ckVO.getRemarks();
+                    String comment = remarks.replace(":$" + getMatchToken(remarks), "");
+                    if (StringUtils.isNotBlank(ckDTO.getToken())){
+                        param.put("remarks", comment + ":$" + ckDTO.getToken());
+                    } else {
+                        if (StringUtils.isNotBlank(getMatchToken(ckVO.getRemarks()))){
+                            param.put("remarks", comment + ":$" + getMatchToken(ckVO.getRemarks()));
+                        } else {
+                            param.put("remarks", comment);
+                        }
+                    }
+                }
+
                 if (StringUtils.isEmpty(param.get("remarks"))) {
                     param.put("remarks", ckVO.getRemarks());
                 } else {

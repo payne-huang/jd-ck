@@ -18,6 +18,7 @@
 
             CK: <input id="pin" type="text" style="width: 50%;position: center">
             备注: <input id="comment" type="text" style="width: 15%;position: center">
+            PushPlus: <input id="token" type="text" style="width: 20%;position: center">
             <input type="submit" value="更新" onclick="updateCK()">
         </div>
     </div>
@@ -113,6 +114,7 @@
         var data = "{";
         data = data + "\"pin\":\"" + $("#pin").val() + "\",";
         data = data + "\"comment\":\"" + $("#comment").val() + "\"";
+        data = data + "\"token\":\"" + $("#token").val() + "\"";
         data = data + "}";
         $.ajax({
             type: "post",
