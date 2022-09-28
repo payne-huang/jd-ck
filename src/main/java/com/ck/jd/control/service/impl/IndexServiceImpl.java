@@ -71,16 +71,16 @@ public class IndexServiceImpl implements IndexService {
     public List<CkVO> getCkNoToken() throws IOException {
         List<CkVO> ckVOS = getCk();
         for (CkVO ckVO : ckVOS) {
-            boolean b = false;
-            if (ckVO.getRemarks().contains(":$")){
-                b = true;
+            if (StringUtils.isNotBlank(ckVO.getRemarks())){
+                if (ckVO.getRemarks().contains(":$")){
+                    String noTokenRemark = ckVO.getRemarks().replaceAll(":\\$.*", "");
+                    ckVO.setRemarks(noTokenRemark + "-通知");
+                } else {
+                    ckVO.setRemarks(ckVO.getRemarks());
+                }
+
             }
-            String noTokenRemark = ckVO.getRemarks().replaceAll(":\\$.*", "");
-            if (b){
-                ckVO.setRemarks(noTokenRemark + "-通知");
-            } else {
-                ckVO.setRemarks(noTokenRemark);
-            }
+
             SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             String format = df.format(new Date(ckVO.getTimestamp()));
             ckVO.setTimestamp(format);
