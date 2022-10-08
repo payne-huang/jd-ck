@@ -157,6 +157,18 @@ public class IndexServiceImpl implements IndexService {
                         .bodyString(JSON.toJSONString(ids), ContentType.APPLICATION_JSON).execute().returnContent().toString();
             } else {
                 List<Map<String, String>> list = new ArrayList<>();
+                if (StringUtils.isNotBlank(ckDTO.getComment()) ){
+                    if (StringUtils.isNotBlank(ckDTO.getToken())){
+                        param.put("remarks", ckDTO.getComment() + ":$" + ckDTO.getToken());
+                    } else {
+                        param.put("remarks", ckDTO.getComment());
+                    }
+                } else {
+                    if (StringUtils.isNotBlank(ckDTO.getToken())){
+                        param.put("remarks", ":$" + ckDTO.getToken());
+                    }
+                }
+
                 list.add(param);
                 Request.Post(clientHost + url)
                         .addHeader("Authorization", "Bearer " + getToken())
