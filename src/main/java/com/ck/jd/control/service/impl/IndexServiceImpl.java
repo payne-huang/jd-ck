@@ -141,13 +141,6 @@ public class IndexServiceImpl implements IndexService {
                     }
                 }
 
-                if (StringUtils.isEmpty(param.get("remarks"))) {
-                    param.put("remarks", ckVO.getRemarks());
-                } else {
-                    if (StringUtils.isNotBlank(ckVO.getRemarks()) && StringUtils.isNotBlank(getMatchToken(ckVO.getRemarks()))) {
-                        param.put("remarks", ckDTO.getComment() + ":$" + getMatchToken(ckVO.getRemarks()));
-                    }
-                }
                 Request.Put(clientHost + url)
                         .addHeader("Authorization", "Bearer " + getToken())
                         .bodyString(JSON.toJSONString(param), ContentType.APPLICATION_JSON).execute().returnContent().toString();
