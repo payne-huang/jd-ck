@@ -224,9 +224,9 @@ public class IndexServiceImpl implements IndexService {
 
     private void push(String token, long time) {
         try {
-            String content = URLEncoder.encode("CK还剩下" + time + "天，速更新！");
+            String content = URLEncoder.encode("CK还剩下" + time + "天，速更新！打开链接http://souji.iok.la:9002更新CK!");
             if (time < 0){
-                content = URLEncoder.encode("CK已过期请更新，速更新！");
+                content = URLEncoder.encode("CK已过期请更新，速更新！打开链接http://souji.iok.la:9002更新CK!");
             }
             String url = String.format("http://www.pushplus.plus/send?token=%s&title=%s&content=%s&template=json", token, "CK更新通知", content);
             Request.Get(url).execute().returnContent().toString();
