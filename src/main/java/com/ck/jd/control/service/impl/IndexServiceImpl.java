@@ -233,14 +233,15 @@ public class IndexServiceImpl implements IndexService {
         return null;
     }
 
-    private void exec() {
+    private void exec() throws IOException {
         List<MessageVO> messageVOS = new ArrayList<>();
 
-        GitHub gitHub = null;
+        GitHub gitHub;
         try {
             gitHub = new GitHubBuilder().withOAuthToken(gitHubToken).build();
         } catch (IOException e) {
             log.error("初始化账号失败！={}", e.getMessage());
+            throw e;
         }
         String[] subscribes = gitSubscribes.trim().split(";");
         for (String subscribe : subscribes) {
