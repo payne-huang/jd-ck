@@ -196,7 +196,8 @@ public class IndexServiceImpl implements IndexService {
                 if (ckVO.getStatus() != 0 && StringUtils.isNotBlank(remarks) && StringUtils.isNotBlank(getMatchToken(remarks))) {
                     log.info("通知用户={}", remarks);
                     String token = getMatchToken(remarks);
-                    push(token);
+                    String comment = remarks.replace(":$"+token, "");
+                    push(token, comment);
                 }
             }
         } catch (Exception e) {
@@ -204,9 +205,9 @@ public class IndexServiceImpl implements IndexService {
         }
     }
 
-    private void push(String token) {
+    private void push( String token,String comment) {
         try {
-            String content = URLEncoder.encode("CK已过期，速更新！打开链接http://souji.iok.la:9002更新CK!");
+            String content = URLEncoder.encode("【"+comment+"】CK已过期，速更新！打开链接http://souji.iok.la:9002更新CK!");
             String url = String.format("http://www.pushplus.plus/send?token=%s&title=%s&content=%s&template=json", token, "CK更新通知", content);
             Request.Get(url).execute().returnContent().toString();
         } catch (Exception e) {

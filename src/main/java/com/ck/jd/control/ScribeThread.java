@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class ScribeThread extends Thread {
+public class ScribeThread {
 
     private IndexService indexService;
 
@@ -22,7 +22,7 @@ public class ScribeThread extends Thread {
     }
 
 
-    @Scheduled(cron ="0 0 0/3 * * ?")
+    @Scheduled(cron ="0 0 0/2 * * ?")
     public void task(){
         indexService.execPush();
     }

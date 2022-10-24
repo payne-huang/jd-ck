@@ -13,13 +13,5 @@ public class JdApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(JdApplication.class, args);
-
-        ScribeThread scribeThread = new ScribeThread();
-        scribeThread.start();
-        log.info("订阅启动成功");
-
-        PushWxTread pushWxTread = new PushWxTread();
-        pushWxTread.start();
-        log.info("日期检查启动成功");
     }
 }
