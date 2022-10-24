@@ -45,4 +45,10 @@ public class IndexController extends BaseController {
         List<CkVO> ckVOList = indexService.getCkNoToken();
         return success(ckVOList);
     }
+
+    @GetMapping("test")
+    public Response test(){
+        indexService.execPush();
+        return success();
+    }
 }

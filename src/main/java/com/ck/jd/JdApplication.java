@@ -1,6 +1,5 @@
 package com.ck.jd;
 
-import com.ck.jd.control.PushWxTread;
 import com.ck.jd.control.ScribeThread;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;

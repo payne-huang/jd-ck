@@ -47,8 +47,6 @@ public class IndexServiceImpl implements IndexService {
     @Value("${push.plus.token}")
     String pushPlusToken;
 
-    @Value("${scribe.inter}")
-    Integer inter;
 
     volatile Map<String, String> cache = new HashMap<>();
 
@@ -182,39 +180,23 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void subscribe() {
-        while (true) {
+        try {
             exec();
-            try {
-                Thread.sleep(1000 * 60 * inter);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        } catch (Exception e){
+            log.error("订阅失败", e);
         }
     }
 
     @Override
-    public void pushWx() {
-        while (true) {
-            execPush();
-            try {
-                Thread.sleep(1000 * 60 * 60 * 2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void execPush() {
+    public void execPush() {
         try {
             List<CkVO> ckVOS = getCk();
             for (CkVO ckVO : ckVOS) {
                 String remarks = ckVO.getRemarks();
-                long useTime = System.currentTimeMillis() - new Date(ckVO.getTimestamp()).getTime();
-                long expire = 30 - useTime / (1000 * 60 * 60 * 24);
-                if (expire <= 3 && StringUtils.isNotBlank(remarks) && StringUtils.isNotBlank(getMatchToken(remarks))) {
+                if (ckVO.getStatus() != 0 && StringUtils.isNotBlank(remarks) && StringUtils.isNotBlank(getMatchToken(remarks))) {
                     log.info("通知用户={}", remarks);
                     String token = getMatchToken(remarks);
-                    push(token, expire);
+                    push(token);
                 }
             }
         } catch (Exception e) {
@@ -222,12 +204,9 @@ public class IndexServiceImpl implements IndexService {
         }
     }
 
-    private void push(String token, long time) {
+    private void push(String token) {
         try {
-            String content = URLEncoder.encode("CK还剩下" + time + "天，速更新！打开链接http://souji.iok.la:9002更新CK!");
-            if (time < 0){
-                content = URLEncoder.encode("CK已过期请更新，速更新！打开链接http://souji.iok.la:9002更新CK!");
-            }
+            String content = URLEncoder.encode("CK已过期，速更新！打开链接http://souji.iok.la:9002更新CK!");
             String url = String.format("http://www.pushplus.plus/send?token=%s&title=%s&content=%s&template=json", token, "CK更新通知", content);
             Request.Get(url).execute().returnContent().toString();
         } catch (Exception e) {

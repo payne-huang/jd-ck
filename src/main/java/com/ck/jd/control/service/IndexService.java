@@ -15,5 +15,5 @@ public interface IndexService {
 
     void subscribe();
 
-    void pushWx();
+    void execPush();
 }
