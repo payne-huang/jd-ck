@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
-@Lazy(false)
 public class SpringContextUtil implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 

@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service(value = "indexService")
 @Slf4j
+@Service(value = "indexService")
 public class IndexServiceImpl implements IndexService {
 
     @Value("${client.host}")
