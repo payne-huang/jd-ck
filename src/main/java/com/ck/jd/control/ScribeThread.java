@@ -2,12 +2,12 @@ package com.ck.jd.control;
 
 import com.ck.jd.common.util.SpringContextUtil;
 import com.ck.jd.control.service.IndexService;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
+@DependsOn("springContextUtil")
 public class ScribeThread {
 
     private IndexService indexService;
